@@ -14,32 +14,27 @@ const resolvers = {
   },
 
   Mutation: {
-    login: async (parent, { body }, res) => {
-      const user = await User.findOne({
-        $or: [{ username: body.username }, { email: body.email }],
-      });
+    login: async (parent, { email, password }, res) => {
+      const user = await User.findOne({ email });
       if (!user) {
         return res.status(400).json({ message: "No user found" });
       }
-      const correctPw = await user.isCorrectPassword(body.password);
+      const correctPw = await user.isCorrectPassword(password);
 
       if (!correctPw) {
-        return res.status(400).json({ message: "Wrong password!" });
+        throw new AuthenticationError("Incorrect credentials");
       }
       const token = signToken(user);
       res.json({ token, user });
     },
 
-    addUser: async (parent, { body }, res) => {
-      const user = await User.create(body);
-      if (!user) {
-        return res.status(400).json({ message: "No user found" });
-      }
+    addUser: async (parent, { username, email, password }, res) => {
+      const user = await User.create({ username, email, password });
       const token = signToken(user);
       res.json({ token, user });
     },
 
-    saveBook: async (parent, { user, body }, res) => {
+    saveBook: async (parent, { user, body }, context) => {
       console.log(user);
       try {
         const updatedUser = await User.findOneAndUpdate(
