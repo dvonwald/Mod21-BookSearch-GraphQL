@@ -24,7 +24,6 @@ const typeDefs = gql`
   }
 
   type Query {
-    books: [Book]
     me: User
   }
 
@@ -42,3 +41,5 @@ const typeDefs = gql`
     removeBook(bookId: String!): User
   }
 `;
+
+module.exports = typeDefs;
